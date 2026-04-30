@@ -1,0 +1,10 @@
+{
+  "subjects": ["Maths", "Further Maths", "Biology", "Chemistry"],
+  "difficulties": ["Easy", "Medium", "Hard", "Critical"],
+  "topics": {
+    "Maths": ["Algebra", "Calculus", "Trigonometry", "Statistics", "Mechanics"],
+    "Further Maths": ["Complex Numbers", "Matrices", "Further Calculus", "Discrete"],
+    "Biology": ["Cell Biology", "Genetics", "Ecology", "Physiology"],
+    "Chemistry": ["Organic", "Inorganic", "Physical", "Analytical"]
+  }
+}
