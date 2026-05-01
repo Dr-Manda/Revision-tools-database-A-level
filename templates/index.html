@@ -3,222 +3,569 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Revision Tracker</title>
+    <title>Revision Tracker Pro</title>
     <style>
         :root {
             --primary: #4a90e2;
-            --bg: #f5f7fa;
+            --primary-dark: #357abd;
+            --bg: #f0f2f5;
             --card: #ffffff;
-            --text: #333;
+            --text: #1c1e21;
+            --text-secondary: #606770;
             --accent: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
         }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
+            padding-bottom: 70px; /* Space for nav */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
             padding: 20px;
+            box-sizing: border-box;
+        }
+
+        header {
+            background: var(--card);
+            padding: 15px 20px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.2rem;
+            margin: 0;
+            color: var(--primary);
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: none;
+            border: none;
+            cursor: pointer;
+            flex: 1;
         }
-        .container {
-            width: 100%;
-            max-width: 500px;
-            background: var(--card);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-        }
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            text-align: center;
+
+        .nav-item.active {
             color: var(--primary);
         }
-        .form-group {
-            margin-bottom: 15px;
+
+        .nav-icon {
+            font-size: 1.4rem;
+            margin-bottom: 2px;
         }
+
+        /* Views */
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
         }
-        select, input[type="text"], input[type="file"], textarea {
+
+        select, input[type="text"], textarea {
             width: 100%;
             padding: 12px;
             border: 1px solid #ddd;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 1rem;
             box-sizing: border-box;
             background: #fff;
+            transition: border-color 0.2s;
         }
-        input[type="file"] {
-            padding: 10px;
-            background: #f9f9f9;
+
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
         }
-        button {
-            width: 100%;
-            padding: 15px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background 0.2s;
-        }
-        button:active {
-            background-color: #357abd;
-        }
-        .preview {
-            margin-top: 15px;
+
+        .file-input-wrapper {
+            position: relative;
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 20px;
             text-align: center;
+            cursor: pointer;
         }
-        #imagePreview {
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .preview-img {
             max-width: 100%;
             border-radius: 8px;
+            margin-top: 15px;
             display: none;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        .success-msg {
-            display: none;
-            color: var(--accent);
-            text-align: center;
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        button:active {
+            transform: scale(0.98);
+            background-color: var(--primary-dark);
+        }
+
+        button.secondary {
+            background-color: #e4e6eb;
+            color: var(--text);
+            margin-top: 10px;
+        }
+
+        button.danger {
+            background-color: var(--danger);
+        }
+
+        /* Dashboard Items */
+        .mistake-card {
+            background: var(--card);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mistake-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .mistake-content {
+            padding: 15px;
+        }
+
+        .tag-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .tag-subject { background: #e1f0ff; color: #007bff; }
+        .tag-difficulty { background: #fff3cd; color: #856404; }
+        .difficulty-Hard { background: #f8d7da; color: #721c24; }
+        .difficulty-Critical { background: #000; color: #fff; }
+
+        .mistake-title {
+            font-weight: 700;
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+
+        .mistake-fix {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.4;
+            border-left: 3px solid var(--accent);
+            padding-left: 10px;
+            margin-top: 10px;
+        }
+
+        .card-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
             margin-top: 15px;
-            font-weight: bold;
+            padding-top: 10px;
+            border-top: 1px solid #f0f2f5;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            padding: 5px;
+            width: auto;
+        }
+
+        .action-btn.edit { color: var(--primary); }
+        .action-btn.delete { color: var(--danger); }
+
+        /* Modal for Image Zoom */
+        #imageModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #imageModal img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 5px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
         }
     </style>
 </head>
 <body>
+    <header>
+        <h1 id="viewTitle">Revision Tracker</h1>
+        <div id="filterContainer" style="display: none;">
+            <select id="subjectFilter" style="padding: 5px; font-size: 0.8rem; border-radius: 5px;">
+                <option value="">All Subjects</option>
+            </select>
+        </div>
+    </header>
+
     <div class="container">
-        <h1>Add Revision Item</h1>
-        <form id="uploadForm" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="image">Question Photo</label>
-                <input type="file" id="image" name="image" accept="image/*" capture="environment" required>
-                <div class="preview">
-                    <img id="imagePreview" src="" alt="Preview">
-                </div>
-            </div>
+        <!-- Add View -->
+        <section id="addView" class="view active">
+            <div class="card">
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label>Question Photo</label>
+                        <div class="file-input-wrapper">
+                            <span>📷 Tap to Take Photo or Upload</span>
+                            <input type="file" id="imageInput" name="image" accept="image/*" required>
+                        </div>
+                        <img id="imagePreview" class="preview-img" src="" alt="Preview">
+                    </div>
 
-            <div class="form-group">
-                <label for="subject">Subject</label>
-                <select id="subject" name="subject" required>
-                    <option value="">Select Subject</option>
-                </select>
-            </div>
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <select id="subject" name="subject" required>
+                            <option value="">Select Subject</option>
+                        </select>
+                    </div>
 
-            <div class="form-group">
-                <label for="topic">Topic</label>
-                <select id="topic" name="topic" required>
-                    <option value="">Select Topic</option>
-                </select>
-            </div>
+                    <div class="form-group">
+                        <label for="topic">Topic</label>
+                        <select id="topic" name="topic" required>
+                            <option value="">Select Topic</option>
+                        </select>
+                    </div>
 
-            <div class="form-group">
-                <label for="difficulty">Difficulty</label>
-                <select id="difficulty" name="difficulty" required>
-                    <option value="">Select Difficulty</option>
-                </select>
-            </div>
+                    <div class="form-group">
+                        <label for="difficulty">Difficulty</label>
+                        <select id="difficulty" name="difficulty" required>
+                            <option value="">Select Difficulty</option>
+                        </select>
+                    </div>
 
-            <div class="form-group">
-                <label for="mistake">Mistake Description</label>
-                <textarea id="mistake" name="mistake" rows="3" placeholder="What went wrong?"></textarea>
-            </div>
+                    <div class="form-group">
+                        <label for="mistake">Mistake Description</label>
+                        <textarea id="mistake" name="mistake" rows="2" placeholder="What went wrong?"></textarea>
+                    </div>
 
-            <div class="form-group">
-                <label for="fix">Actionable Fix</label>
-                <textarea id="fix" name="fix" rows="3" placeholder="How to avoid this next time?"></textarea>
-            </div>
+                    <div class="form-group">
+                        <label for="fix">Actionable Fix</label>
+                        <textarea id="fix" name="fix" rows="2" placeholder="How to avoid this next time?"></textarea>
+                    </div>
 
-            <button type="submit">Save to Database</button>
-            <div id="successMsg" class="success-msg">Successfully Saved!</div>
-        </form>
+                    <button type="submit" id="saveBtn">Save to Database</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Dashboard View -->
+        <section id="dashboardView" class="view">
+            <div id="mistakesList">
+                <!-- Mistakes will be rendered here -->
+            </div>
+        </section>
+
+        <!-- Edit View -->
+        <section id="editView" class="view">
+            <div class="card">
+                <h2>Edit Item</h2>
+                <form id="editForm">
+                    <input type="hidden" id="editId">
+                    <div class="form-group">
+                        <label for="editSubject">Subject</label>
+                        <select id="editSubject" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTopic">Topic</label>
+                        <select id="editTopic" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDifficulty">Difficulty</label>
+                        <select id="editDifficulty" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editMistake">Mistake Description</label>
+                        <textarea id="editMistake" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="editFix">Actionable Fix</label>
+                        <textarea id="editFix" rows="2"></textarea>
+                    </div>
+                    <button type="submit">Update Item</button>
+                    <button type="button" class="secondary" onclick="switchView('dashboard')">Cancel</button>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <nav>
+        <button class="nav-item active" id="navAdd" onclick="switchView('add')">
+            <span class="nav-icon">➕</span>
+            <span>Add</span>
+        </button>
+        <button class="nav-item" id="navDashboard" onclick="switchView('dashboard')">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+        </button>
+    </nav>
+
+    <div id="imageModal" onclick="this.style.display='none'">
+        <img id="modalImg" src="" alt="Zoomed View">
     </div>
 
     <script>
         let config = {};
+        let currentMistakes = [];
 
-        // Load config from server
-        fetch('/config')
-            .then(res => res.json())
-            .then(data => {
-                config = data;
-                const subjSelect = document.getElementById('subject');
-                data.subjects.forEach(s => {
-                    const opt = document.createElement('option');
-                    opt.value = s;
-                    opt.textContent = s;
-                    subjSelect.appendChild(opt);
-                });
+        // App Initialization
+        async function init() {
+            try {
+                const res = await fetch('/api/config');
+                config = await res.json();
+                populateDropdowns();
+                populateFilters();
+            } catch (e) {
+                console.error("Failed to load config", e);
+            }
+        }
 
-                const diffSelect = document.getElementById('difficulty');
-                data.difficulties.forEach(d => {
+        function populateDropdowns() {
+            const subjectSelects = [document.getElementById('subject'), document.getElementById('editSubject')];
+            const diffSelects = [document.getElementById('difficulty'), document.getElementById('editDifficulty')];
+
+            config.subjects.forEach(s => {
+                subjectSelects.forEach(sel => {
                     const opt = document.createElement('option');
-                    opt.value = d;
-                    opt.textContent = d;
-                    diffSelect.appendChild(opt);
+                    opt.value = s; opt.textContent = s; sel.appendChild(opt);
                 });
             });
 
-        // Update topics when subject changes
-        document.getElementById('subject').addEventListener('change', (e) => {
-            const topicSelect = document.getElementById('topic');
-            topicSelect.innerHTML = '<option value="">Select Topic</option>';
-            const selectedSubject = e.target.value;
-            if (config.topics[selectedSubject]) {
-                config.topics[selectedSubject].forEach(t => {
+            config.difficulties.forEach(d => {
+                diffSelects.forEach(sel => {
                     const opt = document.createElement('option');
-                    opt.value = t;
-                    opt.textContent = t;
+                    opt.value = d; opt.textContent = d; sel.appendChild(opt);
+                });
+            });
+
+            // Handle topic changes
+            subjectSelects[0].addEventListener('change', (e) => updateTopics(e.target.value, 'topic'));
+            subjectSelects[1].addEventListener('change', (e) => updateTopics(e.target.value, 'editTopic'));
+        }
+
+        function updateTopics(subject, targetId, defaultValue = "") {
+            const topicSelect = document.getElementById(targetId);
+            topicSelect.innerHTML = '<option value="">Select Topic</option>';
+            if (config.topics[subject]) {
+                config.topics[subject].forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = t; opt.textContent = t;
+                    if (t === defaultValue) opt.selected = true;
                     topicSelect.appendChild(opt);
                 });
             }
-        });
+        }
 
-        // Image preview
-        document.getElementById('image').addEventListener('change', (e) => {
-            const preview = document.getElementById('imagePreview');
-            const file = e.target.files[0];
-            if (file) {
+        function populateFilters() {
+            const filter = document.getElementById('subjectFilter');
+            config.subjects.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s; opt.textContent = s; filter.appendChild(opt);
+            });
+            filter.addEventListener('change', () => renderMistakes());
+        }
+
+        // View Switching
+        function switchView(viewName) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('filterContainer').style.display = (viewName === 'dashboard') ? 'block' : 'none';
+
+            if (viewName === 'add') {
+                document.getElementById('addView').classList.add('active');
+                document.getElementById('navAdd').classList.add('active');
+                document.getElementById('viewTitle').textContent = 'Add Revision Item';
+            } else if (viewName === 'dashboard') {
+                document.getElementById('dashboardView').classList.add('active');
+                document.getElementById('navDashboard').classList.add('active');
+                document.getElementById('viewTitle').textContent = 'Dashboard';
+                loadMistakes();
+            } else if (viewName === 'edit') {
+                document.getElementById('editView').classList.add('active');
+                document.getElementById('viewTitle').textContent = 'Edit Item';
+            }
+        }
+
+        // Image Preview & Paste Support
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+
+        function handleFile(file) {
+            if (file && file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = (re) => {
-                    preview.src = re.target.result;
-                    preview.style.display = 'block';
+                    imagePreview.src = re.target.result;
+                    imagePreview.style.display = 'block';
                 };
                 reader.readAsDataURL(file);
+                
+                // For pasted files, we need to manually update the input
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                imageInput.files = dataTransfer.files;
+            }
+        }
+
+        imageInput.addEventListener('change', (e) => {
+            handleFile(e.target.files[0]);
+        });
+
+        // Global paste listener
+        window.addEventListener('paste', (e) => {
+            const items = e.clipboardData.items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const blob = items[i].getAsFile();
+                    handleFile(blob);
+                    break;
+                }
             }
         });
 
-        // Form submission
+        // Add Mistake
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = e.target.querySelector('button');
-            const successMsg = document.getElementById('successMsg');
-            
+            const btn = document.getElementById('saveBtn');
             btn.disabled = true;
             btn.textContent = 'Saving...';
 
             const formData = new FormData(e.target);
             try {
-                const response = await fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-                if (response.ok) {
-                    successMsg.style.display = 'block';
+                const res = await fetch('/api/mistakes', { method: 'POST', body: formData });
+                if (res.ok) {
+                    alert('Successfully saved!');
                     e.target.reset();
                     document.getElementById('imagePreview').style.display = 'none';
-                    setTimeout(() => {
-                        successMsg.style.display = 'none';
-                    }, 3000);
+                    switchView('dashboard');
                 } else {
-                    alert('Error saving data');
+                    alert('Error saving');
                 }
             } catch (err) {
                 alert('Connection error');
@@ -227,6 +574,122 @@
                 btn.textContent = 'Save to Database';
             }
         });
+
+        // Load & Render Mistakes
+        async function loadMistakes() {
+            const container = document.getElementById('mistakesList');
+            container.innerHTML = '<div class="empty-state">Loading...</div>';
+            
+            try {
+                const res = await fetch('/api/mistakes');
+                currentMistakes = await res.json();
+                renderMistakes();
+            } catch (err) {
+                container.innerHTML = '<div class="empty-state">Failed to load mistakes.</div>';
+            }
+        }
+
+        function renderMistakes() {
+            const container = document.getElementById('mistakesList');
+            const filterSubject = document.getElementById('subjectFilter').value;
+            
+            const filtered = filterSubject 
+                ? currentMistakes.filter(m => m.subject === filterSubject)
+                : currentMistakes;
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">📝</span>
+                        <p>No mistakes found. Time to study!</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(m => `
+                <div class="mistake-card" id="mistake-${m.id}">
+                    <img src="/${m.image_path}" class="mistake-img" onclick="zoomImage('/${m.image_path}')">
+                    <div class="mistake-content">
+                        <div class="tag-row">
+                            <span class="tag tag-subject">${m.subject}</span>
+                            <span class="tag tag-difficulty difficulty-${m.difficulty}">${m.difficulty}</span>
+                        </div>
+                        <div class="mistake-title">${m.topic}</div>
+                        <div style="font-size: 0.9rem; margin-top: 5px;">${m.mistake || ''}</div>
+                        ${m.actionable_fix ? `<div class="mistake-fix"><strong>Fix:</strong> ${m.actionable_fix}</div>` : ''}
+                        
+                        <div class="card-actions">
+                            <button class="action-btn edit" onclick="startEdit(${m.id})">Edit</button>
+                            <button class="action-btn delete" onclick="deleteMistake(${m.id})">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function zoomImage(src) {
+            document.getElementById('modalImg').src = src;
+            document.getElementById('imageModal').style.display = 'flex';
+        }
+
+        // Delete Mistake
+        async function deleteMistake(id) {
+            if (!confirm('Are you sure you want to delete this?')) return;
+            try {
+                const res = await fetch(`/api/mistakes/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    currentMistakes = currentMistakes.filter(m => m.id !== id);
+                    renderMistakes();
+                }
+            } catch (err) {
+                alert('Delete failed');
+            }
+        }
+
+        // Edit Mistake
+        function startEdit(id) {
+            const m = currentMistakes.find(x => x.id === id);
+            if (!m) return;
+
+            document.getElementById('editId').value = m.id;
+            document.getElementById('editSubject').value = m.subject;
+            updateTopics(m.subject, 'editTopic', m.topic);
+            document.getElementById('editDifficulty').value = m.difficulty;
+            document.getElementById('editMistake').value = m.mistake;
+            document.getElementById('editFix').value = m.actionable_fix;
+
+            switchView('edit');
+        }
+
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const data = {
+                subject: document.getElementById('editSubject').value,
+                topic: document.getElementById('editTopic').value,
+                difficulty: document.getElementById('editDifficulty').value,
+                mistake: document.getElementById('editMistake').value,
+                actionable_fix: document.getElementById('editFix').value
+            };
+
+            try {
+                const res = await fetch(`/api/mistakes/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    switchView('dashboard');
+                } else {
+                    alert('Update failed');
+                }
+            } catch (err) {
+                alert('Connection error');
+            }
+        });
+
+        // Start
+        init();
     </script>
 </body>
 </html>
