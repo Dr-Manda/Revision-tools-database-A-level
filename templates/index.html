@@ -333,8 +333,8 @@
                 <form id="uploadForm">
                     <div class="form-group">
                         <label>Question Photo</label>
-                        <div class="file-input-wrapper">
-                            <span>📷 Tap to Take Photo or Upload</span>
+                        <div class="file-input-wrapper" id="dropZone">
+                            <span id="dropText">📷 Tap to Take Photo / Upload<br><small>(or Paste Image anywhere)</small></span>
                             <input type="file" id="imageInput" name="image" accept="image/*" required>
                         </div>
                         <img id="imagePreview" class="preview-img" src="" alt="Preview">
