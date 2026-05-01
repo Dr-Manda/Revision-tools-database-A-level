@@ -1,0 +1,15 @@
+{
+  "short_name": "Revision",
+  "name": "Revision Tracker Pro",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#008080",
+  "display": "standalone",
+  "theme_color": "#008080"
+}

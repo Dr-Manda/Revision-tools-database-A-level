@@ -8,25 +8,34 @@ from database import get_db_connection, init_db
 app = Flask(__name__)
 
 # Configuration
-UPLOAD_FOLDER = 'images'
-CONFIG_FILE = 'config.json'
+UPLOAD_FOLDER = 'static/images'
+CONFIG_FILE = 'config/config.json'
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 init_db()
 
 def get_local_ip():
+    ips = ["localhost", "127.0.0.1"]
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
+        s.settimeout(0)
+        # doesn't even have to be reachable
+        s.connect(('10.254.254.254', 1))
         ip = s.getsockname()[0]
+        if ip not in ips:
+            ips.append(ip)
         s.close()
-        return ip
     except Exception:
-        return "localhost"
+        pass
+    return ips
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/api/health')
+def health():
+    return jsonify({"status": "ok", "timestamp": datetime.now().isoformat()})
 
 @app.route('/api/config')
 def get_config():
@@ -46,6 +55,37 @@ def get_mistakes():
     conn.close()
     return jsonify([dict(ix) for ix in mistakes])
 
+def update_config_if_needed(subject, topic, difficulty):
+    if not os.path.exists(CONFIG_FILE):
+        return
+    try:
+        with open(CONFIG_FILE, 'r') as f:
+            config = json.load(f)
+        
+        updated = False
+        if subject and subject not in config.get('subjects', []):
+            config.setdefault('subjects', []).append(subject)
+            updated = True
+        
+        if difficulty and difficulty not in config.get('difficulties', []):
+            config.setdefault('difficulties', []).append(difficulty)
+            updated = True
+            
+        if subject and topic:
+            topics = config.setdefault('topics', {})
+            if subject not in topics:
+                topics[subject] = [topic]
+                updated = True
+            elif topic not in topics[subject]:
+                topics[subject].append(topic)
+                updated = True
+                
+        if updated:
+            with open(CONFIG_FILE, 'w') as f:
+                json.dump(config, f, indent=2)
+    except Exception as e:
+        print(f"Failed to update config: {e}")
+
 @app.route('/api/mistakes', methods=['POST'])
 def add_mistake():
     if 'image' not in request.files:
@@ -60,6 +100,8 @@ def add_mistake():
     difficulty = request.form.get('difficulty')
     mistake = request.form.get('mistake')
     fix = request.form.get('fix')
+    
+    update_config_if_needed(subject, topic, difficulty)
     
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     file_ext = os.path.splitext(file.filename)[1]
@@ -87,6 +129,8 @@ def update_mistake(id):
     difficulty = data.get('difficulty')
     mistake = data.get('mistake')
     fix = data.get('actionable_fix')
+
+    update_config_if_needed(subject, topic, difficulty)
 
     conn = get_db_connection()
     conn.execute('''
@@ -118,10 +162,22 @@ def custom_static(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 if __name__ == '__main__':
-    ip = get_local_ip()
-    print("\n" + "="*50)
-    print(f"SERVER STARTED!")
-    print(f"On your iPhone, type this address into Safari:")
-    print(f"http://{ip}:5000")
-    print("="*50 + "\n")
-    app.run(host='0.0.0.0', port=5000)
+    ips = get_local_ip()
+    print("\n" + "╔" + "═"*58 + "╗")
+    print("║" + " "*19 + "REVISION TRACKER PRO" + " "*19 + "║")
+    print("╠" + "═"*58 + "╣")
+    print(f"║ SERVER STARTED!                                          ║")
+    print(f"║                                                          ║")
+    print(f"║ On THIS computer, go to:                                 ║")
+    print(f"║ http://localhost:5000                                    ║")
+    print(f"║                                                          ║")
+    print(f"║ On your iPhone/Tablet, try these addresses:              ║")
+    for ip in ips:
+        if ip != "localhost" and ip != "127.0.0.1":
+            print(f"║ http://{ip:15}:5000                                 ║")
+    print(f"║                                                          ║")
+    print(f"║ NOTE: If it times out, ensure your Windows Firewall      ║")
+    print(f"║ is allowing 'Python' through for Private networks!       ║")
+    print("╚" + "═"*58 + "╝" + "\n")
+    
+    app.run(host='0.0.0.0', port=5000, debug=False)

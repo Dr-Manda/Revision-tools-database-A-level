@@ -1,0 +1,10 @@
+{
+  "subjects": ["Maths", "Further Maths", "Biology", "Chemistry"],
+  "difficulties": ["Easy", "Medium", "Hard", "Critical"],
+  "topics": {
+    "Maths": ["Pure", "Applied"],
+    "Further Maths": ["Core Pure", "Modules"],
+    "Biology": ["Paper 1 - Biological Processes", "Paper 2 - Biological Diversity", "Paper 3 - Unified Biology"],
+    "Chemistry": ["Paper 1 - Inorganic", "Paper 2 - Organic", "Paper 3 - Practicals"]
+  }
+}

@@ -1,7 +1,7 @@
 import sqlite3
 import os
 
-DB_PATH = 'database.db'
+DB_PATH = 'data/database.db'
 
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
@@ -19,7 +19,8 @@ def init_db():
             mistake TEXT,
             actionable_fix TEXT,
             image_path TEXT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            ai_solution TEXT
         )
     ''')
     conn.commit()

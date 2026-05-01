@@ -15,11 +15,15 @@ if %errorlevel% neq 0 (
     exit /b
 )
 
-echo [1/2] Verifying dependencies...
+echo [1/3] Verifying dependencies...
 :: We now use Flask and SQLite (built-in)
-python -m pip install flask --quiet
+python -m pip install flask pyOpenSSL --quiet
 
-echo [2/2] Starting API Server...
+echo [2/3] Checking Machine IP...
+ipconfig | findstr /i "IPv4"
+echo.
+
+echo [3/3] Starting API Server...
 echo.
 :: Run app.py which now handles DB init and the SPA
 python app.py

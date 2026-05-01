@@ -4,692 +4,334 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Revision Tracker Pro</title>
-    <style>
-        :root {
-            --primary: #4a90e2;
-            --primary-dark: #357abd;
-            --bg: #f0f2f5;
-            --card: #ffffff;
-            --text: #1c1e21;
-            --text-secondary: #606770;
-            --accent: #2ecc71;
-            --danger: #e74c3c;
-            --warning: #f39c12;
-            --shadow: 0 2px 12px rgba(0,0,0,0.08);
-        }
+    
+    <!-- PWA / App Settings -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Revision">
+    <link rel="apple-touch-icon" href="/static/icon-192.png">
+    <meta name="theme-color" content="#008080">
+    
+    <!-- External Styles -->
+    <link rel="stylesheet" href="/static/css/style.css">
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding-bottom: 70px; /* Space for nav */
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        header {
-            background: var(--card);
-            padding: 15px 20px;
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        header h1 {
-            font-size: 1.2rem;
-            margin: 0;
-            color: var(--primary);
-        }
-
-        /* Navigation */
-        nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--card);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none;
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-            font-weight: 500;
-            background: none;
-            border: none;
-            cursor: pointer;
-            flex: 1;
-        }
-
-        .nav-item.active {
-            color: var(--primary);
-        }
-
-        .nav-icon {
-            font-size: 1.4rem;
-            margin-bottom: 2px;
-        }
-
-        /* Views */
-        .view {
-            display: none;
-        }
-
-        .view.active {
-            display: block;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Cards */
-        .card {
-            background: var(--card);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-        }
-
-        /* Forms */
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        select, input[type="text"], textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 1rem;
-            box-sizing: border-box;
-            background: #fff;
-            transition: border-color 0.2s;
-        }
-
-        select:focus, input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .file-input-wrapper {
-            position: relative;
-            background: #f8f9fa;
-            border: 2px dashed #ddd;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-        }
-
-        .file-input-wrapper input[type="file"] {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        .preview-img {
-            max-width: 100%;
-            border-radius: 8px;
-            margin-top: 15px;
-            display: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-        }
-
-        button:active {
-            transform: scale(0.98);
-            background-color: var(--primary-dark);
-        }
-
-        button.secondary {
-            background-color: #e4e6eb;
-            color: var(--text);
-            margin-top: 10px;
-        }
-
-        button.danger {
-            background-color: var(--danger);
-        }
-
-        /* Dashboard Items */
-        .mistake-card {
-            background: var(--card);
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 15px;
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .mistake-img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            cursor: pointer;
-        }
-
-        .mistake-content {
-            padding: 15px;
-        }
-
-        .tag-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-
-        .tag {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .tag-subject { background: #e1f0ff; color: #007bff; }
-        .tag-difficulty { background: #fff3cd; color: #856404; }
-        .difficulty-Hard { background: #f8d7da; color: #721c24; }
-        .difficulty-Critical { background: #000; color: #fff; }
-
-        .mistake-title {
-            font-weight: 700;
-            margin-bottom: 5px;
-            font-size: 1rem;
-        }
-
-        .mistake-fix {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.4;
-            border-left: 3px solid var(--accent);
-            padding-left: 10px;
-            margin-top: 10px;
-        }
-
-        .card-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 15px;
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px solid #f0f2f5;
-        }
-
-        .action-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-            padding: 5px;
-            width: auto;
-        }
-
-        .action-btn.edit { color: var(--primary); }
-        .action-btn.delete { color: var(--danger); }
-
-        /* Modal for Image Zoom */
-        #imageModal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        #imageModal img {
-            max-width: 100%;
-            max-height: 100%;
-            border-radius: 5px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
-        }
-
-        .empty-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            display: block;
-        }
-    </style>
+    <!-- Markdown and Math rendering libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            startup: {
+                typeset: false // We will typeset manually when the modal opens
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
-    <header>
-        <h1 id="viewTitle">Revision Tracker</h1>
-        <div id="filterContainer" style="display: none;">
-            <select id="subjectFilter" style="padding: 5px; font-size: 0.8rem; border-radius: 5px;">
-                <option value="">All Subjects</option>
-            </select>
+    <div id="desktop">
+        <!-- Desktop Icons -->
+        <div class="desktop-icons">
+            <div class="desktop-icon" ondblclick="openWindow('dashboard')">
+                <img src="/static/icon-192.png" alt="My Computer">
+                <span>My Computer</span>
+            </div>
+            <div class="desktop-icon" ondblclick="openWindow('add')">
+                <img src="/static/icon-192.png" alt="Notepad">
+                <span>Notepad</span>
+            </div>
+            <div class="desktop-icon" ondblclick="openWindow('sheets')">
+                <img src="/static/icon-192.png" alt="Exam Tracker">
+                <span>Exam Tracker</span>
+            </div>
+            <div class="desktop-icon" ondblclick="openWindow('terminal')">
+                <img src="/static/icon-192.png" alt="Terminal">
+                <span>Terminal.exe</span>
+            </div>
         </div>
-    </header>
 
-    <div class="container">
-        <!-- Add View -->
-        <section id="addView" class="view active">
-            <div class="card">
-                <form id="uploadForm">
-                    <div class="form-group">
-                        <label>Question Photo</label>
-                        <div class="file-input-wrapper" id="dropZone">
-                            <span id="dropText">📷 Tap to Take Photo / Upload<br><small>(or Paste Image anywhere)</small></span>
-                            <input type="file" id="imageInput" name="image" accept="image/*" required>
+        <nav id="topNav">
+            <div class="nav-row nav-row-main">
+                <button class="nav-item" id="navAdd" onclick="openWindow('add')">
+                    <span class="nav-icon">⊞</span>
+                    <span>New Item</span>
+                </button>
+                <button class="nav-item active" id="navDashboard" onclick="switchSubjectTab('All')">
+                    <span class="nav-icon">📂</span>
+                    <span>All Uploads</span>
+                </button>
+                <!-- Subjects will be injected here -->
+            </div>
+            <div class="nav-row nav-row-topics" id="navRowTopics">
+                <!-- Topics will be injected here dynamically -->
+            </div>
+        </nav>
+
+        <!-- Window Container -->
+        <div id="window-container">
+            <!-- Add View Window -->
+            <div id="win-add" class="window" style="display: none; width: 450px; top: 100px; left: 100px;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <img src="/static/icon-192.png" class="window-icon">
+                        <span>New_Item.exe - Notepad</span>
+                    </div>
+                    <div class="window-controls">
+                        <button class="win-btn minimize" onclick="minimizeWindow('add')">_</button>
+                        <button class="win-btn maximize" onclick="maximizeWindow('add')">▢</button>
+                        <button class="win-btn close" onclick="closeWindow('add')">X</button>
+                    </div>
+                </div>
+                <div class="window-body">
+                    <section id="addView" class="view active">
+                        <div class="card-content">
+                            <form id="uploadForm">
+                                <div class="form-group">
+                                    <label>Question Photo</label>
+                                    <div class="file-input-wrapper" id="dropZone">
+                                        <span id="dropText">📷 Click to Upload / Paste Image</span>
+                                        <input type="file" id="imageInput" name="image" accept="image/*" required>
+                                    </div>
+                                    <img id="imagePreview" class="preview-img" src="" alt="Preview">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="subject">Subject</label>
+                                    <input type="text" id="subject" name="subject" list="subjectsList" required autocomplete="off" placeholder="Type or select subject">
+                                    <datalist id="subjectsList"></datalist>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="topic">Topic</label>
+                                    <input type="text" id="topic" name="topic" list="topicsList" required autocomplete="off" placeholder="Type or select topic">
+                                    <datalist id="topicsList"></datalist>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="difficulty">Difficulty</label>
+                                    <select id="difficulty" name="difficulty" required>
+                                        <option value="">Select Difficulty</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="mistake">Mistake Description</label>
+                                    <textarea id="mistake" name="mistake" rows="2" placeholder="What went wrong?"></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="fix">Actionable Fix</label>
+                                    <textarea id="fix" name="fix" rows="2" placeholder="How to avoid this next time?"></textarea>
+                                </div>
+
+                                <button type="submit" id="saveBtn">Save to Database</button>
+                            </form>
                         </div>
-                        <img id="imagePreview" class="preview-img" src="" alt="Preview">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="subject">Subject</label>
-                        <select id="subject" name="subject" required>
-                            <option value="">Select Subject</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="topic">Topic</label>
-                        <select id="topic" name="topic" required>
-                            <option value="">Select Topic</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="difficulty">Difficulty</label>
-                        <select id="difficulty" name="difficulty" required>
-                            <option value="">Select Difficulty</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="mistake">Mistake Description</label>
-                        <textarea id="mistake" name="mistake" rows="2" placeholder="What went wrong?"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="fix">Actionable Fix</label>
-                        <textarea id="fix" name="fix" rows="2" placeholder="How to avoid this next time?"></textarea>
-                    </div>
-
-                    <button type="submit" id="saveBtn">Save to Database</button>
-                </form>
+                    </section>
+                </div>
             </div>
-        </section>
 
-        <!-- Dashboard View -->
-        <section id="dashboardView" class="view">
-            <div id="mistakesList">
-                <!-- Mistakes will be rendered here -->
+            <!-- Dashboard Window -->
+            <div id="win-dashboard" class="window" style="display: none; width: 90%; max-width: 1000px; height: 80vh; top: 50px; left: 50px;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <img src="/static/icon-192.png" class="window-icon">
+                        <span>My Computer - [All Uploads]</span>
+                    </div>
+                    <div class="window-controls">
+                        <button class="win-btn minimize" onclick="minimizeWindow('dashboard')">_</button>
+                        <button class="win-btn maximize" onclick="maximizeWindow('dashboard')">▢</button>
+                        <button class="win-btn close" onclick="closeWindow('dashboard')">X</button>
+                    </div>
+                </div>
+                <div class="window-body">
+                    <header id="dashboardHeader">
+                        <div id="filterContainer">
+                            <input type="text" id="searchInput" placeholder="Search mistakes...">
+                            <select id="subjectFilter">
+                                <option value="">All Subjects</option>
+                            </select>
+                            <select id="difficultyFilter">
+                                <option value="">All Difficulties</option>
+                            </select>
+                            <select id="sortFilter">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                            </select>
+                        </div>
+                    </header>
+                    <section id="dashboardView" class="view active">
+                        <div id="mistakesList">
+                            <!-- Mistakes will be rendered here -->
+                        </div>
+                    </section>
+                </div>
             </div>
-        </section>
 
-        <!-- Edit View -->
-        <section id="editView" class="view">
-            <div class="card">
-                <h2>Edit Item</h2>
-                <form id="editForm">
-                    <input type="hidden" id="editId">
-                    <div class="form-group">
-                        <label for="editSubject">Subject</label>
-                        <select id="editSubject" required></select>
+            <!-- Sheets Window -->
+            <div id="win-sheets" class="window" style="display: none; width: 80%; height: 70vh; top: 80px; left: 80px;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <img src="/static/icon-192.png" class="window-icon">
+                        <span>Exam_Tracker.xls</span>
                     </div>
-                    <div class="form-group">
-                        <label for="editTopic">Topic</label>
-                        <select id="editTopic" required></select>
+                    <div class="window-controls">
+                        <button class="win-btn minimize" onclick="minimizeWindow('sheets')">_</button>
+                        <button class="win-btn maximize" onclick="maximizeWindow('sheets')">▢</button>
+                        <button class="win-btn close" onclick="closeWindow('sheets')">X</button>
                     </div>
-                    <div class="form-group">
-                        <label for="editDifficulty">Difficulty</label>
-                        <select id="editDifficulty" required></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="editMistake">Mistake Description</label>
-                        <textarea id="editMistake" rows="2"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="editFix">Actionable Fix</label>
-                        <textarea id="editFix" rows="2"></textarea>
-                    </div>
-                    <button type="submit">Update Item</button>
-                    <button type="button" class="secondary" onclick="switchView('dashboard')">Cancel</button>
-                </form>
+                </div>
+                <div class="window-body" style="padding: 0;">
+                    <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTZBfq29fdtvRpByLALAqC8MbjaSGdOkGBqZk7ovuASKoH71SkdwFVlLLWqFMk1SmGKSNnhM_08U6Cf/pubhtml?widget=true&amp;headers=false" style="width: 100%; height: 100%; border: none;"></iframe>
+                </div>
             </div>
-        </section>
+
+            <!-- Terminal Window -->
+            <div id="win-terminal" class="window" style="display: none; width: 500px; top: 150px; left: 150px;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <img src="/static/icon-192.png" class="window-icon">
+                        <span>Terminal.exe</span>
+                    </div>
+                    <div class="window-controls">
+                        <button class="win-btn minimize" onclick="minimizeWindow('terminal')">_</button>
+                        <button class="win-btn maximize" onclick="maximizeWindow('terminal')">▢</button>
+                        <button class="win-btn close" onclick="closeWindow('terminal')">X</button>
+                    </div>
+                </div>
+                <div class="window-body" style="background: #000; color: #0f0; font-family: 'Courier New', Courier, monospace; padding: 10px; display: flex; flex-direction: column;">
+                    <div style="flex: 1;">
+                        <p>Revision Tracker AI CLI v1.0.0</p>
+                        <p>To process new uploads, run:</p>
+                        <p style="color: #fff; background: #333; padding: 5px; font-weight: bold;">Review my uploads</p>
+                        <hr style="border: 0.5px solid #0f0;">
+                        <p id="terminal-status">Checking for new mistakes...</p>
+                    </div>
+                    <button onclick="updateTerminalStatus()" style="background: #333; color: #0f0; border: 1px solid #0f0; margin-top: 10px; width: 100px; font-family: inherit;">[Refresh]</button>
+                </div>
+            </div>
+
+            <!-- Edit View Window -->
+            <div id="win-edit" class="window" style="display: none; width: 450px; top: 120px; left: 120px;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <img src="/static/icon-192.png" class="window-icon">
+                        <span>Edit_Item.exe</span>
+                    </div>
+                    <div class="window-controls">
+                        <button class="win-btn minimize" onclick="minimizeWindow('edit')">_</button>
+                        <button class="win-btn maximize" onclick="maximizeWindow('edit')">▢</button>
+                        <button class="win-btn close" onclick="closeWindow('edit')">X</button>
+                    </div>
+                </div>
+                <div class="window-body">
+                    <section id="editView" class="view active">
+                        <div class="card-content">
+                            <form id="editForm">
+                                <input type="hidden" id="editId">
+                                <div class="form-group">
+                                    <label for="editSubject">Subject</label>
+                                    <input type="text" id="editSubject" list="editSubjectsList" autocomplete="off" placeholder="Type or select subject (optional)">
+                                    <datalist id="editSubjectsList"></datalist>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editTopic">Topic</label>
+                                    <input type="text" id="editTopic" list="editTopicsList" autocomplete="off" placeholder="Type or select topic (optional)">
+                                    <datalist id="editTopicsList"></datalist>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editDifficulty">Difficulty</label>
+                                    <select id="editDifficulty"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editMistake">Mistake Description</label>
+                                    <textarea id="editMistake" rows="2"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editFix">Actionable Fix</label>
+                                    <textarea id="editFix" rows="2"></textarea>
+                                </div>
+                                <button type="submit">Update Item</button>
+                                <button type="button" onclick="closeWindow('edit')">Cancel</button>
+                            </form>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <nav>
-        <button class="nav-item active" id="navAdd" onclick="switchView('add')">
-            <span class="nav-icon">➕</span>
-            <span>Add</span>
+    <!-- Taskbar -->
+    <div id="taskbar">
+        <button id="start-btn">
+            <img src="/static/icon-192.png" alt="Start">
+            <span>Start</span>
         </button>
-        <button class="nav-item" id="navDashboard" onclick="switchView('dashboard')">
-            <span class="nav-icon">📊</span>
-            <span>Dashboard</span>
-        </button>
-    </nav>
+        <div id="taskbar-apps">
+            <!-- Active app tabs will be injected here -->
+        </div>
+        <div id="tray">
+            <span id="tray-clock">12:00 PM</span>
+        </div>
+    </div>
+
+    <!-- Start Menu -->
+    <div id="start-menu" style="display: none;">
+        <div class="start-sidebar">
+            <span><b>Windows</b>95</span>
+        </div>
+        <div class="start-links">
+            <div class="start-link" onclick="openWindow('dashboard')">
+                <span class="start-icon">📂</span> All Uploads
+            </div>
+            <div class="start-link" onclick="openWindow('add')">
+                <span class="start-icon">📝</span> New Item
+            </div>
+            <div class="start-link" onclick="openWindow('sheets')">
+                <span class="start-icon">📊</span> Exam Tracker
+            </div>
+            <div class="start-link" onclick="openWindow('terminal')">
+                <span class="start-icon">💻</span> Terminal
+            </div>
+            <hr>
+            <div class="start-link" onclick="showShutdownAlert()">
+                <span class="start-icon">🚪</span> Shut Down...
+            </div>
+        </div>
+    </div>
 
     <div id="imageModal" onclick="this.style.display='none'">
         <img id="modalImg" src="" alt="Zoomed View">
     </div>
 
-    <script>
-        let config = {};
-        let currentMistakes = [];
-
-        // App Initialization
-        async function init() {
-            try {
-                const res = await fetch('/api/config');
-                config = await res.json();
-                populateDropdowns();
-                populateFilters();
-            } catch (e) {
-                console.error("Failed to load config", e);
-            }
-        }
-
-        function populateDropdowns() {
-            const subjectSelects = [document.getElementById('subject'), document.getElementById('editSubject')];
-            const diffSelects = [document.getElementById('difficulty'), document.getElementById('editDifficulty')];
-
-            config.subjects.forEach(s => {
-                subjectSelects.forEach(sel => {
-                    const opt = document.createElement('option');
-                    opt.value = s; opt.textContent = s; sel.appendChild(opt);
-                });
-            });
-
-            config.difficulties.forEach(d => {
-                diffSelects.forEach(sel => {
-                    const opt = document.createElement('option');
-                    opt.value = d; opt.textContent = d; sel.appendChild(opt);
-                });
-            });
-
-            // Handle topic changes
-            subjectSelects[0].addEventListener('change', (e) => updateTopics(e.target.value, 'topic'));
-            subjectSelects[1].addEventListener('change', (e) => updateTopics(e.target.value, 'editTopic'));
-        }
-
-        function updateTopics(subject, targetId, defaultValue = "") {
-            const topicSelect = document.getElementById(targetId);
-            topicSelect.innerHTML = '<option value="">Select Topic</option>';
-            if (config.topics[subject]) {
-                config.topics[subject].forEach(t => {
-                    const opt = document.createElement('option');
-                    opt.value = t; opt.textContent = t;
-                    if (t === defaultValue) opt.selected = true;
-                    topicSelect.appendChild(opt);
-                });
-            }
-        }
-
-        function populateFilters() {
-            const filter = document.getElementById('subjectFilter');
-            config.subjects.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s; opt.textContent = s; filter.appendChild(opt);
-            });
-            filter.addEventListener('change', () => renderMistakes());
-        }
-
-        // View Switching
-        function switchView(viewName) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('filterContainer').style.display = (viewName === 'dashboard') ? 'block' : 'none';
-
-            if (viewName === 'add') {
-                document.getElementById('addView').classList.add('active');
-                document.getElementById('navAdd').classList.add('active');
-                document.getElementById('viewTitle').textContent = 'Add Revision Item';
-            } else if (viewName === 'dashboard') {
-                document.getElementById('dashboardView').classList.add('active');
-                document.getElementById('navDashboard').classList.add('active');
-                document.getElementById('viewTitle').textContent = 'Dashboard';
-                loadMistakes();
-            } else if (viewName === 'edit') {
-                document.getElementById('editView').classList.add('active');
-                document.getElementById('viewTitle').textContent = 'Edit Item';
-            }
-        }
-
-        // Image Preview & Paste Support
-        const imageInput = document.getElementById('imageInput');
-        const imagePreview = document.getElementById('imagePreview');
-
-        function handleFile(file) {
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (re) => {
-                    imagePreview.src = re.target.result;
-                    imagePreview.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-                
-                // For pasted files, we need to manually update the input
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(file);
-                imageInput.files = dataTransfer.files;
-            }
-        }
-
-        imageInput.addEventListener('change', (e) => {
-            handleFile(e.target.files[0]);
-        });
-
-        // Global paste listener
-        window.addEventListener('paste', (e) => {
-            const items = e.clipboardData.items;
-            for (let i = 0; i < items.length; i++) {
-                if (items[i].type.indexOf('image') !== -1) {
-                    const blob = items[i].getAsFile();
-                    handleFile(blob);
-                    break;
-                }
-            }
-        });
-
-        // Add Mistake
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('saveBtn');
-            btn.disabled = true;
-            btn.textContent = 'Saving...';
-
-            const formData = new FormData(e.target);
-            try {
-                const res = await fetch('/api/mistakes', { method: 'POST', body: formData });
-                if (res.ok) {
-                    alert('Successfully saved!');
-                    e.target.reset();
-                    document.getElementById('imagePreview').style.display = 'none';
-                    switchView('dashboard');
-                } else {
-                    alert('Error saving');
-                }
-            } catch (err) {
-                alert('Connection error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Save to Database';
-            }
-        });
-
-        // Load & Render Mistakes
-        async function loadMistakes() {
-            const container = document.getElementById('mistakesList');
-            container.innerHTML = '<div class="empty-state">Loading...</div>';
-            
-            try {
-                const res = await fetch('/api/mistakes');
-                currentMistakes = await res.json();
-                renderMistakes();
-            } catch (err) {
-                container.innerHTML = '<div class="empty-state">Failed to load mistakes.</div>';
-            }
-        }
-
-        function renderMistakes() {
-            const container = document.getElementById('mistakesList');
-            const filterSubject = document.getElementById('subjectFilter').value;
-            
-            const filtered = filterSubject 
-                ? currentMistakes.filter(m => m.subject === filterSubject)
-                : currentMistakes;
-
-            if (filtered.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <span class="empty-icon">📝</span>
-                        <p>No mistakes found. Time to study!</p>
-                    </div>`;
-                return;
-            }
-
-            container.innerHTML = filtered.map(m => `
-                <div class="mistake-card" id="mistake-${m.id}">
-                    <img src="/${m.image_path}" class="mistake-img" onclick="zoomImage('/${m.image_path}')">
-                    <div class="mistake-content">
-                        <div class="tag-row">
-                            <span class="tag tag-subject">${m.subject}</span>
-                            <span class="tag tag-difficulty difficulty-${m.difficulty}">${m.difficulty}</span>
-                        </div>
-                        <div class="mistake-title">${m.topic}</div>
-                        <div style="font-size: 0.9rem; margin-top: 5px;">${m.mistake || ''}</div>
-                        ${m.actionable_fix ? `<div class="mistake-fix"><strong>Fix:</strong> ${m.actionable_fix}</div>` : ''}
-                        
-                        <div class="card-actions">
-                            <button class="action-btn edit" onclick="startEdit(${m.id})">Edit</button>
-                            <button class="action-btn delete" onclick="deleteMistake(${m.id})">Delete</button>
-                        </div>
-                    </div>
+    <!-- AI Solution Modal -->
+    <div id="solutionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 5000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;">
+        <div class="window" style="width: 100%; max-width: 1000px; max-height: 90vh; display: flex; flex-direction: column; animation: windowSnap 0.2s ease-out forwards;" onclick="event.stopPropagation()">
+            <div class="window-header">
+                <div class="window-title">
+                    <img src="/static/icon-192.png" class="window-icon">
+                    <span>AI_Solution.exe</span>
                 </div>
-            `).join('');
-        }
+                <div class="window-controls">
+                    <button class="win-btn close" onclick="document.getElementById('solutionModal').style.display='none'">X</button>
+                </div>
+            </div>
+            <div class="window-body" style="display: flex; flex-wrap: wrap; gap: 15px; overflow-y: auto; padding: 15px;">
+                <div style="flex: 1 1 300px; max-width: 100%; display: flex; flex-direction: column; gap: 10px;">
+                    <strong style="font-size: 0.9rem;">Original Upload</strong>
+                    <img id="solutionOriginalImg" src="" style="width: 100%; border: 2px solid var(--win-dark-gray); object-fit: contain; max-height: 50vh;">
+                </div>
+                <div style="flex: 2 1 400px; min-width: 0; background: var(--win-white); border: 2px solid; border-color: var(--win-dark-gray) var(--win-white) var(--win-white) var(--win-dark-gray); padding: 15px; font-family: 'Times New Roman', serif; position: relative;" class="crt-scanlines">
+                    <div id="solutionText" class="matrix-text" style="line-height: 1.5; font-size: 1rem; color: var(--win-black); max-height: 60vh; overflow-y: auto;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        function zoomImage(src) {
-            document.getElementById('modalImg').src = src;
-            document.getElementById('imageModal').style.display = 'flex';
-        }
-
-        // Delete Mistake
-        async function deleteMistake(id) {
-            if (!confirm('Are you sure you want to delete this?')) return;
-            try {
-                const res = await fetch(`/api/mistakes/${id}`, { method: 'DELETE' });
-                if (res.ok) {
-                    currentMistakes = currentMistakes.filter(m => m.id !== id);
-                    renderMistakes();
-                }
-            } catch (err) {
-                alert('Delete failed');
-            }
-        }
-
-        // Edit Mistake
-        function startEdit(id) {
-            const m = currentMistakes.find(x => x.id === id);
-            if (!m) return;
-
-            document.getElementById('editId').value = m.id;
-            document.getElementById('editSubject').value = m.subject;
-            updateTopics(m.subject, 'editTopic', m.topic);
-            document.getElementById('editDifficulty').value = m.difficulty;
-            document.getElementById('editMistake').value = m.mistake;
-            document.getElementById('editFix').value = m.actionable_fix;
-
-            switchView('edit');
-        }
-
-        document.getElementById('editForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('editId').value;
-            const data = {
-                subject: document.getElementById('editSubject').value,
-                topic: document.getElementById('editTopic').value,
-                difficulty: document.getElementById('editDifficulty').value,
-                mistake: document.getElementById('editMistake').value,
-                actionable_fix: document.getElementById('editFix').value
-            };
-
-            try {
-                const res = await fetch(`/api/mistakes/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                if (res.ok) {
-                    switchView('dashboard');
-                } else {
-                    alert('Update failed');
-                }
-            } catch (err) {
-                alert('Connection error');
-            }
-        });
-
-        // Start
-        init();
-    </script>
+    <!-- External Logic -->
+    <script src="/static/js/app.js"></script>
 </body>
 </html>
