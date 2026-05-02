@@ -49,21 +49,29 @@ button:active, button.active {
     flex: 1;
     position: relative;
     overflow: hidden;
-    padding: 10px;
-    background-image: url('https://web.archive.org/web/20220120155644im_/https://www.windows93.net/c/sys/skins/w93/bg.png'); /* Clouds placeholder if teal is boring */
-    background-color: var(--bg);
-    background-repeat: no-repeat;
-    background-position: center;
+    padding-top: 100px;
+    background-color: #008080; /* Classic Win98 Teal */
+    background-image: url('https://i.redd.it/zge85fc9j0g11.jpg');
     background-size: cover;
+    background-position: center;
+}
+
+#desktop.dimmed::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.15);
+    pointer-events: none;
+    z-index: 4500;
 }
 
 .desktop-icons {
     display: grid;
     grid-template-columns: repeat(auto-fill, 80px);
     grid-template-rows: repeat(auto-fill, 90px);
-    gap: 10px;
+    gap: 15px;
     position: absolute;
-    top: 10px;
+    top: 110px;
     left: 10px;
     z-index: 1;
 }
@@ -159,18 +167,54 @@ button:active, button.active {
     background: var(--win-gray);
 }
 
+#win-dashboard .window-body {
+    background: #f0f0f0; /* Better contrast for toolbar and content */
+}
+
+#win-dashboard nav {
+    margin: -10px -10px 10px -10px; /* Flush with window edges */
+}
+
 /* Top Nav as ToolBar */
 nav {
     background: var(--win-gray);
-    border-bottom: 2px solid var(--win-dark-gray);
-    margin-bottom: 10px;
+    border-bottom: 2px solid;
+    border-color: var(--win-white) var(--win-black) var(--win-black) var(--win-white);
     padding: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .nav-row {
     display: flex;
     gap: 4px;
     padding: 2px;
+    overflow-x: auto;
+}
+
+.nav-item {
+    background: var(--win-gray);
+    border: 1px solid transparent;
+    padding: 2px 6px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.nav-item:hover {
+    border-color: var(--win-white) var(--win-dark-gray) var(--win-dark-gray) var(--win-white);
+}
+
+.nav-item.active {
+    background: var(--win-border-light);
+    border-color: var(--win-dark-gray) var(--win-white) var(--win-white) var(--win-dark-gray);
+}
+
+.nav-icon {
+    font-size: 1rem;
 }
 
 /* Taskbar */
@@ -375,15 +419,79 @@ input[type="text"], select, textarea {
         top: 0 !important;
         left: 0 !important;
         box-shadow: none;
+        border: none;
     }
     .desktop-icons { display: none; }
+    #taskbar-apps { display: none; } /* Simplify taskbar on mobile */
+    .task-tab { display: none; }
+    #tray { padding: 0 5px; }
+    #tray-date { display: none; }
+    .window-header { cursor: default; } /* No dragging on mobile */
 }
 
-/* Custom Cursors */
-[onclick], button, a, .desktop-icon {
-    cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAD9JREFUOE9jZKAQMFKon2HUAKIBpBvA8O+fH8N/YvVjGf7/f/7/H0kDCHmArO+RNYCcB8j6HlkDyHmArO+RNUCeBgAlSST5IisatQAAAABJRU5ErkJggg=='), pointer;
+/* Custom Cursors - Simplified for reliability */
+body, [onclick], button, a, .desktop-icon, .window-header, .task-tab, .win-btn {
+    cursor: default;
 }
 
-.waiting {
+button, a, [onclick], .desktop-icon, .win-btn, .task-tab {
+    cursor: pointer !important;
+}
+
+.waiting, .waiting * {
     cursor: wait !important;
+}
+
+/* Calendar Window Specifics */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    background: var(--win-white);
+    border: 2px solid;
+    border-color: var(--win-dark-gray) var(--win-white) var(--win-white) var(--win-dark-gray);
+    padding: 5px;
+}
+
+.calendar-day {
+    text-align: center;
+    padding: 4px;
+    font-size: 0.8rem;
+    border: 1px solid transparent;
+}
+
+.calendar-day.header {
+    font-weight: bold;
+    background: var(--win-gray);
+    border: 1px solid var(--win-dark-gray);
+}
+
+.calendar-day.today {
+    border-color: var(--win-blue);
+    background: #ffffcc;
+    font-weight: bold;
+}
+hite);
+    border: 2px solid;
+    border-color: var(--win-dark-gray) var(--win-white) var(--win-white) var(--win-dark-gray);
+    padding: 5px;
+}
+
+.calendar-day {
+    text-align: center;
+    padding: 4px;
+    font-size: 0.8rem;
+    border: 1px solid transparent;
+}
+
+.calendar-day.header {
+    font-weight: bold;
+    background: var(--win-gray);
+    border: 1px solid var(--win-dark-gray);
+}
+
+.calendar-day.today {
+    border-color: var(--win-blue);
+    background: #ffffcc;
+    font-weight: bold;
 }

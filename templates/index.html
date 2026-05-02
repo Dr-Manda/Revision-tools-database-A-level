@@ -36,110 +36,75 @@
         <!-- Desktop Icons -->
         <div class="desktop-icons">
             <div class="desktop-icon" ondblclick="openWindow('dashboard')">
-                <img src="/static/icon-192.png" alt="My Computer">
+                <img src="https://win98icons.alexmeub.com/icons/png/computer_explorer-5.png" alt="My Computer">
                 <span>My Computer</span>
             </div>
             <div class="desktop-icon" ondblclick="openWindow('add')">
-                <img src="/static/icon-192.png" alt="Notepad">
+                <img src="https://win98icons.alexmeub.com/icons/png/notepad-0.png" alt="Notepad">
                 <span>Notepad</span>
             </div>
             <div class="desktop-icon" ondblclick="openWindow('sheets')">
-                <img src="/static/icon-192.png" alt="Exam Tracker">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/86/Microsoft_Excel_2003_icon.svg" alt="Exam Tracker">
                 <span>Exam Tracker</span>
             </div>
+            <div class="desktop-icon" ondblclick="openWindow('notes')">
+                <img src="https://win98icons.alexmeub.com/icons/png/write_wordpad-0.png" alt="Notes">
+                <span>Notes.doc</span>
+            </div>
+            <div class="desktop-icon" ondblclick="openWindow('gemini')">
+                <img src="https://win98icons.alexmeub.com/icons/png/msie1-0.png" alt="Gemini">
+                <span>Gemini.exe</span>
+            </div>
             <div class="desktop-icon" ondblclick="openWindow('terminal')">
-                <img src="/static/icon-192.png" alt="Terminal">
+                <img src="https://win98icons.alexmeub.com/icons/png/console_prompt-0.png" alt="Terminal">
                 <span>Terminal.exe</span>
             </div>
         </div>
 
-        <nav id="topNav">
-            <div class="nav-row nav-row-main">
-                <button class="nav-item" id="navAdd" onclick="openWindow('add')">
-                    <span class="nav-icon">⊞</span>
-                    <span>New Item</span>
-                </button>
-                <button class="nav-item active" id="navDashboard" onclick="switchSubjectTab('All')">
-                    <span class="nav-icon">📂</span>
-                    <span>All Uploads</span>
-                </button>
-                <!-- Subjects will be injected here -->
-            </div>
-            <div class="nav-row nav-row-topics" id="navRowTopics">
-                <!-- Topics will be injected here dynamically -->
-            </div>
-        </nav>
-
         <!-- Window Container -->
         <div id="window-container">
-            <!-- Add View Window -->
-            <div id="win-add" class="window" style="display: none; width: 450px; top: 100px; left: 100px;">
+            <!-- Gemini Window -->
+            <div id="win-gemini" class="window" style="display: none; width: 85%; height: 80vh; top: 40px; left: 40px;">
                 <div class="window-header">
                     <div class="window-title">
-                        <img src="/static/icon-192.png" class="window-icon">
-                        <span>New_Item.exe - Notepad</span>
+                        <img src="https://win98icons.alexmeub.com/icons/png/msie1-0.png" class="window-icon">
+                        <span>Gemini AI - Study Help</span>
                     </div>
                     <div class="window-controls">
-                        <button class="win-btn minimize" onclick="minimizeWindow('add')">_</button>
-                        <button class="win-btn maximize" onclick="maximizeWindow('add')">▢</button>
-                        <button class="win-btn close" onclick="closeWindow('add')">X</button>
+                        <button class="win-btn minimize" onclick="minimizeWindow('gemini')">_</button>
+                        <button class="win-btn maximize" onclick="maximizeWindow('gemini')">▢</button>
+                        <button class="win-btn close" onclick="closeWindow('gemini')">X</button>
                     </div>
                 </div>
-                <div class="window-body">
-                    <section id="addView" class="view active">
-                        <div class="card-content">
-                            <form id="uploadForm">
-                                <div class="form-group">
-                                    <label>Question Photo</label>
-                                    <div class="file-input-wrapper" id="dropZone">
-                                        <span id="dropText">📷 Click to Upload / Paste Image</span>
-                                        <input type="file" id="imageInput" name="image" accept="image/*" required>
-                                    </div>
-                                    <img id="imagePreview" class="preview-img" src="" alt="Preview">
-                                </div>
+                <div class="window-body" style="padding: 0;">
+                    <iframe src="https://gemini.google.com/app" style="width: 100%; height: 100%; border: none;"></iframe>
+                </div>
+            </div>
 
-                                <div class="form-group">
-                                    <label for="subject">Subject</label>
-                                    <input type="text" id="subject" name="subject" list="subjectsList" required autocomplete="off" placeholder="Type or select subject">
-                                    <datalist id="subjectsList"></datalist>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="topic">Topic</label>
-                                    <input type="text" id="topic" name="topic" list="topicsList" required autocomplete="off" placeholder="Type or select topic">
-                                    <datalist id="topicsList"></datalist>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="difficulty">Difficulty</label>
-                                    <select id="difficulty" name="difficulty" required>
-                                        <option value="">Select Difficulty</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="mistake">Mistake Description</label>
-                                    <textarea id="mistake" name="mistake" rows="2" placeholder="What went wrong?"></textarea>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="fix">Actionable Fix</label>
-                                    <textarea id="fix" name="fix" rows="2" placeholder="How to avoid this next time?"></textarea>
-                                </div>
-
-                                <button type="submit" id="saveBtn">Save to Database</button>
-                            </form>
-                        </div>
-                    </section>
+            <!-- Notes Window -->
+            <div id="win-notes" class="window" style="display: none; width: 80%; height: 75vh; top: 60px; left: 60px;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <img src="https://win98icons.alexmeub.com/icons/png/write_wordpad-0.png" class="window-icon">
+                        <span>Notes.doc - WordPad</span>
+                    </div>
+                    <div class="window-controls">
+                        <button class="win-btn minimize" onclick="minimizeWindow('notes')">_</button>
+                        <button class="win-btn maximize" onclick="maximizeWindow('notes')">▢</button>
+                        <button class="win-btn close" onclick="closeWindow('notes')">X</button>
+                    </div>
+                </div>
+                <div class="window-body" style="padding: 0;">
+                    <iframe src="https://docs.google.com/document/d/1NAyS5IcWjALBch9zZBdcRQgcb0lHT3V3zjFfdxQv53w/edit?usp=sharing" style="width: 100%; height: 100%; border: none;"></iframe>
                 </div>
             </div>
 
             <!-- Dashboard Window -->
-            <div id="win-dashboard" class="window" style="display: none; width: 90%; max-width: 1000px; height: 80vh; top: 50px; left: 50px;">
+            <div id="win-dashboard" class="window" style="display: none; width: 90%; height: 85vh; top: 20px; left: 20px;">
                 <div class="window-header">
                     <div class="window-title">
-                        <img src="/static/icon-192.png" class="window-icon">
-                        <span>My Computer - [All Uploads]</span>
+                        <img src="https://win98icons.alexmeub.com/icons/png/computer_explorer-5.png" class="window-icon">
+                        <span>My Computer - Dashboard</span>
                     </div>
                     <div class="window-controls">
                         <button class="win-btn minimize" onclick="minimizeWindow('dashboard')">_</button>
@@ -148,35 +113,94 @@
                     </div>
                 </div>
                 <div class="window-body">
-                    <header id="dashboardHeader">
-                        <div id="filterContainer">
-                            <input type="text" id="searchInput" placeholder="Search mistakes...">
-                            <select id="subjectFilter">
-                                <option value="">All Subjects</option>
-                            </select>
-                            <select id="difficultyFilter">
-                                <option value="">All Difficulties</option>
-                            </select>
-                            <select id="sortFilter">
-                                <option value="newest">Newest First</option>
-                                <option value="oldest">Oldest First</option>
-                            </select>
+                    <nav>
+                        <div class="nav-row" id="subject-tabs">
+                            <button class="nav-item active" id="navSub_All" onclick="switchSubjectTab('All')">All Subjects</button>
+                            <!-- Populated by JS -->
                         </div>
-                    </header>
-                    <section id="dashboardView" class="view active">
-                        <div id="mistakesList">
-                            <!-- Mistakes will be rendered here -->
+                        <div class="nav-row" id="topic-tabs">
+                            <button class="nav-item active" onclick="switchTopicTab('All')">All Topics</button>
+                            <!-- Populated by JS -->
                         </div>
-                    </section>
+                        <div class="nav-row filters">
+                            <div class="filter-group">
+                                <label>Search:</label>
+                                <input type="text" id="searchInput" placeholder="Search mistakes..." style="width: 150px;">
+                            </div>
+                            <div class="filter-group">
+                                <label>Subject:</label>
+                                <select id="subjectFilter"><option value="">All</option></select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Difficulty:</label>
+                                <select id="difficultyFilter"><option value="">All</option></select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Sort:</label>
+                                <select id="sortFilter">
+                                    <option value="newest">Newest First</option>
+                                    <option value="oldest">Oldest First</option>
+                                </select>
+                            </div>
+                        </div>
+                    </nav>
+                    <div id="mistakesList"></div>
+                </div>
+            </div>
+
+            <!-- Add Item Window -->
+            <div id="win-add" class="window" style="display: none; width: 450px; top: 100px; left: 100px;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <img src="https://win98icons.alexmeub.com/icons/png/notepad-0.png" class="window-icon">
+                        <span>New_Mistake.txt - Notepad</span>
+                    </div>
+                    <div class="window-controls">
+                        <button class="win-btn minimize" onclick="minimizeWindow('add')">_</button>
+                        <button class="win-btn maximize" onclick="maximizeWindow('add')">▢</button>
+                        <button class="win-btn close" onclick="closeWindow('add')">X</button>
+                    </div>
+                </div>
+                <div class="window-body">
+                    <form id="uploadForm">
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <input type="text" id="subject" name="subject" list="subjectsList" autocomplete="off" placeholder="Select or type subject">
+                            <datalist id="subjectsList"></datalist>
+                        </div>
+                        <div class="form-group">
+                            <label for="topic">Topic</label>
+                            <input type="text" id="topic" name="topic" list="topicsList" autocomplete="off" placeholder="Select or type topic">
+                            <datalist id="topicsList"></datalist>
+                        </div>
+                        <div class="form-group">
+                            <label for="difficulty">Difficulty</label>
+                            <select id="difficulty" name="difficulty"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="mistake">What was the mistake?</label>
+                            <textarea id="mistake" name="mistake" rows="2" required placeholder="Describe the error..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="fix">How to fix it next time?</label>
+                            <textarea id="fix" name="actionable_fix" rows="2" placeholder="Actionable advice..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="imageInput">Upload Image</label>
+                            <input type="file" id="imageInput" name="image" accept="image/*" required>
+                            <img id="imagePreview" style="display: none; max-width: 100%; margin-top: 10px; border: 1px solid var(--win-dark-gray);">
+                        </div>
+                        <button type="submit" id="saveBtn" style="width: 100%; justify-content: center; margin-top: 10px;">Save to Database</button>
+                    </form>
                 </div>
             </div>
 
             <!-- Sheets Window -->
-            <div id="win-sheets" class="window" style="display: none; width: 80%; height: 70vh; top: 80px; left: 80px;">
+            <div id="win-sheets" class="window" style="display: none; width: 85%; height: 80vh; top: 30px; left: 30px;">
                 <div class="window-header">
                     <div class="window-title">
-                        <img src="/static/icon-192.png" class="window-icon">
-                        <span>Exam_Tracker.xls</span>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/8/86/Microsoft_Excel_2003_icon.svg" class="window-icon">
+                        <span>Exam_Tracker.xls - Excel</span>
                     </div>
                     <div class="window-controls">
                         <button class="win-btn minimize" onclick="minimizeWindow('sheets')">_</button>
@@ -185,7 +209,7 @@
                     </div>
                 </div>
                 <div class="window-body" style="padding: 0;">
-                    <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTZBfq29fdtvRpByLALAqC8MbjaSGdOkGBqZk7ovuASKoH71SkdwFVlLLWqFMk1SmGKSNnhM_08U6Cf/pubhtml?widget=true&amp;headers=false" style="width: 100%; height: 100%; border: none;"></iframe>
+                    <iframe src="https://docs.google.com/spreadsheets/d/1JFWvtjEon36z4_EIw8ix3vXBj2QjB1dmO3dpLdHdSnQ/edit?usp=sharing" style="width: 100%; height: 100%; border: none;"></iframe>
                 </div>
             </div>
 
@@ -193,7 +217,7 @@
             <div id="win-terminal" class="window" style="display: none; width: 500px; top: 150px; left: 150px;">
                 <div class="window-header">
                     <div class="window-title">
-                        <img src="/static/icon-192.png" class="window-icon">
+                        <img src="https://win98icons.alexmeub.com/icons/png/console_prompt-0.png" class="window-icon">
                         <span>Terminal.exe</span>
                     </div>
                     <div class="window-controls">
@@ -214,11 +238,51 @@
                 </div>
             </div>
 
+            <!-- Calendar Window -->
+            <div id="win-calendar" class="window" style="display: none; width: 280px; top: 150px; left: 70%;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <img src="https://win98icons.alexmeub.com/icons/png/calendar-0.png" class="window-icon">
+                        <span>Calendar</span>
+                    </div>
+                    <div class="window-controls">
+                        <button class="win-btn close" onclick="closeWindow('calendar')">X</button>
+                    </div>
+                </div>
+                <div class="window-body">
+                    <div id="calendar-content"></div>
+                </div>
+            </div>
+
+            <!-- AI Solution Window -->
+            <div id="win-solution" class="window" style="display: none; width: 95%; max-width: 1100px; height: 85vh; top: 20px; left: 20px;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <img src="https://win98icons.alexmeub.com/icons/png/ms_office_outlook-0.png" class="window-icon">
+                        <span>AI_Solution.exe</span>
+                    </div>
+                    <div class="window-controls">
+                        <button class="win-btn minimize" onclick="minimizeWindow('solution')">_</button>
+                        <button class="win-btn maximize" onclick="maximizeWindow('solution')">▢</button>
+                        <button class="win-btn close" onclick="closeWindow('solution')">X</button>
+                    </div>
+                </div>
+                <div class="window-body" style="display: flex; flex-wrap: wrap; gap: 15px; overflow-y: auto; padding: 15px;">
+                    <div style="flex: 1 1 300px; max-width: 100%; display: flex; flex-direction: column; gap: 10px;">
+                        <strong style="font-size: 0.9rem;">Original Upload</strong>
+                        <img id="solutionOriginalImg" src="" style="width: 100%; border: 2px solid var(--win-dark-gray); object-fit: contain; max-height: 50vh;">
+                    </div>
+                    <div style="flex: 2 1 400px; min-width: 0; background: var(--win-white); border: 2px solid; border-color: var(--win-dark-gray) var(--win-white) var(--win-white) var(--win-dark-gray); padding: 15px; font-family: 'Times New Roman', serif; position: relative;" class="crt-scanlines">
+                        <div id="solutionText" class="matrix-text" style="line-height: 1.5; font-size: 1rem; color: var(--win-black); max-height: 70vh; overflow-y: auto;"></div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Edit View Window -->
             <div id="win-edit" class="window" style="display: none; width: 450px; top: 120px; left: 120px;">
                 <div class="window-header">
                     <div class="window-title">
-                        <img src="/static/icon-192.png" class="window-icon">
+                        <img src="https://win98icons.alexmeub.com/icons/png/write_wordpad-0.png" class="window-icon">
                         <span>Edit_Item.exe</span>
                     </div>
                     <div class="window-controls">
@@ -267,14 +331,16 @@
     <!-- Taskbar -->
     <div id="taskbar">
         <button id="start-btn">
-            <img src="/static/icon-192.png" alt="Start">
+            <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png" alt="Start">
             <span>Start</span>
         </button>
-        <div id="taskbar-apps">
-            <!-- Active app tabs will be injected here -->
-        </div>
-        <div id="tray">
-            <span id="tray-clock">12:00 PM</span>
+        <div id="taskbar-apps"></div>
+        <div id="tray" onclick="openWindow('calendar')" style="cursor: pointer;">
+            <canvas id="tray-analog" width="20" height="20" style="margin-right: 5px;"></canvas>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; padding: 0 5px;">
+                <span id="tray-clock" style="font-size: 0.75rem;">12:00 PM</span>
+                <span id="tray-date" style="font-size: 0.6rem;">01/05/2026</span>
+            </div>
         </div>
     </div>
 
@@ -285,50 +351,32 @@
         </div>
         <div class="start-links">
             <div class="start-link" onclick="openWindow('dashboard')">
-                <span class="start-icon">📂</span> All Uploads
+                <img src="https://win98icons.alexmeub.com/icons/png/computer_explorer-5.png" class="start-icon" style="width: 24px;"> All Uploads
+            </div>
+            <div class="start-link" onclick="openWindow('gemini')">
+                <img src="https://win98icons.alexmeub.com/icons/png/msie1-0.png" class="start-icon" style="width: 24px;"> Gemini AI
+            </div>
+            <div class="start-link" onclick="openWindow('notes')">
+                <img src="https://win98icons.alexmeub.com/icons/png/write_wordpad-0.png" class="start-icon" style="width: 24px;"> Notes (Word)
             </div>
             <div class="start-link" onclick="openWindow('add')">
-                <span class="start-icon">📝</span> New Item
+                <img src="https://win98icons.alexmeub.com/icons/png/notepad-0.png" class="start-icon" style="width: 24px;"> New Item
             </div>
             <div class="start-link" onclick="openWindow('sheets')">
-                <span class="start-icon">📊</span> Exam Tracker
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/86/Microsoft_Excel_2003_icon.svg" class="start-icon" style="width: 24px;"> Exam Tracker
             </div>
             <div class="start-link" onclick="openWindow('terminal')">
-                <span class="start-icon">💻</span> Terminal
+                <img src="https://win98icons.alexmeub.com/icons/png/console_prompt-0.png" class="start-icon" style="width: 24px;"> Terminal
             </div>
             <hr>
             <div class="start-link" onclick="showShutdownAlert()">
-                <span class="start-icon">🚪</span> Shut Down...
+                <img src="https://win98icons.alexmeub.com/icons/png/shut_down_normal-0.png" class="start-icon" style="width: 24px;"> Shut Down...
             </div>
         </div>
     </div>
 
     <div id="imageModal" onclick="this.style.display='none'">
         <img id="modalImg" src="" alt="Zoomed View">
-    </div>
-
-    <!-- AI Solution Modal -->
-    <div id="solutionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 5000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;">
-        <div class="window" style="width: 100%; max-width: 1000px; max-height: 90vh; display: flex; flex-direction: column; animation: windowSnap 0.2s ease-out forwards;" onclick="event.stopPropagation()">
-            <div class="window-header">
-                <div class="window-title">
-                    <img src="/static/icon-192.png" class="window-icon">
-                    <span>AI_Solution.exe</span>
-                </div>
-                <div class="window-controls">
-                    <button class="win-btn close" onclick="document.getElementById('solutionModal').style.display='none'">X</button>
-                </div>
-            </div>
-            <div class="window-body" style="display: flex; flex-wrap: wrap; gap: 15px; overflow-y: auto; padding: 15px;">
-                <div style="flex: 1 1 300px; max-width: 100%; display: flex; flex-direction: column; gap: 10px;">
-                    <strong style="font-size: 0.9rem;">Original Upload</strong>
-                    <img id="solutionOriginalImg" src="" style="width: 100%; border: 2px solid var(--win-dark-gray); object-fit: contain; max-height: 50vh;">
-                </div>
-                <div style="flex: 2 1 400px; min-width: 0; background: var(--win-white); border: 2px solid; border-color: var(--win-dark-gray) var(--win-white) var(--win-white) var(--win-dark-gray); padding: 15px; font-family: 'Times New Roman', serif; position: relative;" class="crt-scanlines">
-                    <div id="solutionText" class="matrix-text" style="line-height: 1.5; font-size: 1rem; color: var(--win-black); max-height: 60vh; overflow-y: auto;"></div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- External Logic -->

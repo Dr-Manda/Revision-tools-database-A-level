@@ -44,8 +44,10 @@ function openWindow(winId) {
         openWindows.add(winId);
         addTaskbarTab(winId);
         
-        // Default positions if not set
-        if (!win.style.top) {
+        // Mobile optimization: Always maximize on small screens
+        if (window.innerWidth < 600) {
+            maximizeWindow(winId);
+        } else if (!win.style.top) {
             const offset = openWindows.size * 20;
             win.style.top = (50 + offset) + 'px';
             win.style.left = (50 + offset) + 'px';
@@ -57,6 +59,7 @@ function openWindow(winId) {
 
     if (winId === 'dashboard') loadMistakes();
     if (winId === 'terminal') updateTerminalStatus();
+    if (winId === 'calendar') renderCalendar();
 }
 
 function closeWindow(winId) {
@@ -128,7 +131,10 @@ function addTaskbarTab(winId) {
     const winTitleElem = document.querySelector(`#win-${winId} .window-title span`);
     if (winTitleElem) title = winTitleElem.textContent.split(' - ')[0];
 
-    tab.innerHTML = `<img src="/static/icon-192.png"> <span>${title}</span>`;
+    const winIcon = document.querySelector(`#win-${winId} .window-icon`);
+    const iconSrc = winIcon ? winIcon.src : '/static/icon-192.png';
+
+    tab.innerHTML = `<img src="${iconSrc}"> <span>${title}</span>`;
     tab.onclick = () => toggleWindow(winId);
     container.appendChild(tab);
 }
@@ -140,6 +146,7 @@ function removeTaskbarTab(winId) {
 
 function toggleWindow(winId) {
     const win = document.getElementById(`win-${winId}`);
+    if (!win) return;
     if (win.style.display === 'none' || !win.classList.contains('active')) {
         win.style.display = 'flex';
         bringToFront(winId);
@@ -158,7 +165,6 @@ function initWindowInteractions() {
 
     document.addEventListener('mousedown', (e) => {
         const header = e.target.closest('.window-header');
-        const resizeHandle = e.target.closest('.window-body'); // Simple resize from bottom-right area for now
         
         // Bring to front on any click
         const win = e.target.closest('.window');
@@ -168,11 +174,16 @@ function initWindowInteractions() {
             activeWin = header.closest('.window');
             if (activeWin.dataset.maximized === 'true') return;
             mode = 'drag';
-            startPos = { x: e.clientX, y: e.clientY };
-            startRect = { 
-                x: parseInt(activeWin.style.left) || 0, 
-                y: parseInt(activeWin.style.top) || 0 
+            
+            // Calculate mouse offset relative to the window's top-left
+            const rect = activeWin.getBoundingClientRect();
+            startPos = { 
+                x: e.clientX - rect.left, 
+                y: e.clientY - rect.top 
             };
+            
+            // Bring to front
+            bringToFront(activeWin.id.replace('win-', ''));
         } else if (win && e.offsetX > win.clientWidth - 15 && e.offsetY > win.clientHeight - 15) {
             activeWin = win;
             if (activeWin.dataset.maximized === 'true') return;
@@ -242,8 +253,6 @@ function initDesktopContext() {
     desktop.oncontextmenu = (e) => {
         if (e.target !== desktop) return;
         e.preventDefault();
-        // We could show a custom Win95 context menu here
-        console.log("Desktop context menu");
     };
 }
 
@@ -268,12 +277,66 @@ function initStartMenu() {
 
 function initClock() {
     const clock = document.getElementById('tray-clock');
+    const dateTray = document.getElementById('tray-date');
+    const canvas = document.getElementById('tray-analog');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
     const update = () => {
         const now = new Date();
         clock.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        dateTray.textContent = now.toLocaleDateString();
+        
+        // Analogue Clock Draw
+        ctx.clearRect(0, 0, 20, 20);
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(10, 10, 9, 0, Math.PI * 2);
+        ctx.stroke();
+
+        const drawHand = (angle, length, width) => {
+            ctx.lineWidth = width;
+            ctx.beginPath();
+            ctx.moveTo(10, 10);
+            ctx.lineTo(10 + Math.cos(angle) * length, 10 + Math.sin(angle) * length);
+            ctx.stroke();
+        };
+
+        const hr = now.getHours() % 12;
+        const min = now.getMinutes();
+        const sec = now.getSeconds();
+
+        drawHand((hr + min / 60) * Math.PI / 6 - Math.PI / 2, 5, 1.5); // Hour
+        drawHand((min + sec / 60) * Math.PI / 30 - Math.PI / 2, 7, 1);  // Minute
+        ctx.strokeStyle = 'red';
+        drawHand(sec * Math.PI / 30 - Math.PI / 2, 8, 0.5); // Second
     };
     update();
-    setInterval(update, 10000);
+    setInterval(update, 1000);
+}
+
+function renderCalendar() {
+    const container = document.getElementById('calendar-content');
+    const now = new Date();
+    const month = now.getMonth();
+    const year = now.getFullYear();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDay = new Date(year, month, 1).getDay();
+
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    
+    let html = `<div style="text-align: center; font-weight: bold; margin-bottom: 5px;">${monthNames[month]} ${year}</div>`;
+    html += '<div class="calendar-grid">';
+    ['S','M','T','W','T','F','S'].forEach(d => html += `<div class="calendar-day header">${d}</div>`);
+    
+    for (let i = 0; i < firstDay; i++) html += '<div class="calendar-day"></div>';
+    for (let i = 1; i <= daysInMonth; i++) {
+        const isToday = i === now.getDate();
+        html += `<div class="calendar-day ${isToday ? 'today' : ''}">${i}</div>`;
+    }
+    html += '</div>';
+    container.innerHTML = html;
 }
 
 function showShutdownAlert() {
@@ -283,9 +346,10 @@ function showShutdownAlert() {
 
 function updateTerminalStatus() {
     const status = document.getElementById('terminal-status');
+    if (!status) return;
     status.textContent = "Scanning...";
-    fetch('/api/mistakes').then(r => r.json()).then(data => {
-        const unreviewed = data.filter(m => !m.ai_solution).length;
+    fetch('/api/mistakes/stats').then(r => r.json()).then(data => {
+        const unreviewed = data.unreviewed;
         if (unreviewed > 0) {
             status.textContent = `Found ${unreviewed} unreviewed uploads. Please run 'Review my uploads' in your terminal.`;
             status.style.color = '#ff0';
@@ -293,11 +357,15 @@ function updateTerminalStatus() {
             status.textContent = "System clean. All uploads reviewed!";
             status.style.color = '#0f0';
         }
+    }).catch(err => {
+        status.textContent = "Error scanning system.";
+        status.style.color = '#f00';
     });
 }
 
 function populateNavSubjects() {
-    const navRowMain = document.querySelector('.nav-row-main');
+    const navRowMain = document.getElementById('subject-tabs');
+    if (!navRowMain || !config.subjects) return;
     config.subjects.forEach(s => {
         const btn = document.createElement('button');
         btn.className = 'nav-item';
@@ -313,10 +381,12 @@ function switchSubjectTab(subject) {
     currentTabSubject = subject;
     currentTabTopic = 'All';
     
-    document.querySelectorAll('.nav-row-main .nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('#subject-tabs .nav-item').forEach(n => n.classList.remove('active'));
     if (subject === 'All') {
-        document.getElementById('navDashboard').classList.add('active');
-        document.getElementById('navRowTopics').style.display = 'none';
+        const dashboardBtn = document.getElementById('navSub_All');
+        if (dashboardBtn) dashboardBtn.classList.add('active');
+        const topicsRow = document.getElementById('topic-tabs');
+        if (topicsRow) topicsRow.style.display = 'none';
     } else {
         const safeSubject = subject.replace(/[^a-zA-Z0-9]/g, '');
         const tabBtn = document.getElementById(`navSub_${safeSubject}`);
@@ -332,7 +402,8 @@ function switchSubjectTab(subject) {
 }
 
 function populateNavTopics(subject) {
-    const rowTopics = document.getElementById('navRowTopics');
+    const rowTopics = document.getElementById('topic-tabs');
+    if (!rowTopics) return;
     rowTopics.innerHTML = '';
     rowTopics.style.display = 'flex';
 
@@ -343,7 +414,7 @@ function populateNavTopics(subject) {
     allBtn.innerHTML = `<span>All Topics</span>`;
     rowTopics.appendChild(allBtn);
 
-    if (config.topics[subject]) {
+    if (config.topics && config.topics[subject]) {
         config.topics[subject].forEach(t => {
             const btn = document.createElement('button');
             btn.className = 'nav-item nav-item-topic';
@@ -358,7 +429,7 @@ function populateNavTopics(subject) {
 
 function switchTopicTab(topic) {
     currentTabTopic = topic;
-    document.querySelectorAll('.nav-row-topics .nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('#topic-tabs .nav-item').forEach(n => n.classList.remove('active'));
     const safeTopic = topic.replace(/[^a-zA-Z0-9]/g, '');
     const tabBtn = document.getElementById(topic === 'All' ? 'navTopic_All' : `navTopic_${safeTopic}`);
     if (tabBtn) tabBtn.classList.add('active');
@@ -369,28 +440,40 @@ function populateDropdowns() {
     const subjectDatalists = [document.getElementById('subjectsList'), document.getElementById('editSubjectsList')];
     const diffSelects = [document.getElementById('difficulty'), document.getElementById('editDifficulty')];
 
-    config.subjects.forEach(s => {
-        subjectDatalists.forEach(dl => {
-            const opt = document.createElement('option');
-            opt.value = s; dl.appendChild(opt);
+    if (config.subjects) {
+        config.subjects.forEach(s => {
+            subjectDatalists.forEach(dl => {
+                if (dl) {
+                    const opt = document.createElement('option');
+                    opt.value = s; dl.appendChild(opt);
+                }
+            });
         });
-    });
+    }
 
-    config.difficulties.forEach(d => {
-        diffSelects.forEach(sel => {
-            const opt = document.createElement('option');
-            opt.value = d; opt.textContent = d; sel.appendChild(opt);
+    if (config.difficulties) {
+        config.difficulties.forEach(d => {
+            diffSelects.forEach(sel => {
+                if (sel) {
+                    const opt = document.createElement('option');
+                    opt.value = d; opt.textContent = d; sel.appendChild(opt);
+                }
+            });
         });
-    });
+    }
 
-    document.getElementById('subject').addEventListener('input', (e) => updateTopics(e.target.value, 'topicsList'));
-    document.getElementById('editSubject').addEventListener('input', (e) => updateTopics(e.target.value, 'editTopicsList'));
+    const subjectInput = document.getElementById('subject');
+    if (subjectInput) subjectInput.addEventListener('input', (e) => updateTopics(e.target.value, 'topicsList'));
+    
+    const editSubjectInput = document.getElementById('editSubject');
+    if (editSubjectInput) editSubjectInput.addEventListener('input', (e) => updateTopics(e.target.value, 'editTopicsList'));
 }
 
 function updateTopics(subject, targetId, currentTopic = '') {
     const topicDatalist = document.getElementById(targetId);
+    if (!topicDatalist) return;
     topicDatalist.innerHTML = '';
-    if (config.topics[subject]) {
+    if (config.topics && config.topics[subject]) {
         config.topics[subject].forEach(t => {
             const opt = document.createElement('option');
             opt.value = t;
@@ -398,28 +481,37 @@ function updateTopics(subject, targetId, currentTopic = '') {
         });
     }
     if (targetId === 'editTopicsList') {
-        document.getElementById('editTopic').value = currentTopic;
+        const editTopicInput = document.getElementById('editTopic');
+        if (editTopicInput) editTopicInput.value = currentTopic;
     }
 }
 
 function populateFilters() {
     const filter = document.getElementById('subjectFilter');
     const diffFilter = document.getElementById('difficultyFilter');
+    const sortFilter = document.getElementById('sortFilter');
+    const searchInput = document.getElementById('searchInput');
+
+    if (!filter) return;
     
-    config.subjects.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s; opt.textContent = s; filter.appendChild(opt);
-    });
+    if (config.subjects) {
+        config.subjects.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s; opt.textContent = s; filter.appendChild(opt);
+        });
+    }
     
-    config.difficulties.forEach(d => {
-        const opt = document.createElement('option');
-        opt.value = d; opt.textContent = d; diffFilter.appendChild(opt);
-    });
+    if (config.difficulties) {
+        config.difficulties.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d; opt.textContent = d; diffFilter.appendChild(opt);
+        });
+    }
 
     filter.addEventListener('change', () => renderMistakes());
-    diffFilter.addEventListener('change', () => renderMistakes());
-    document.getElementById('sortFilter').addEventListener('change', () => renderMistakes());
-    document.getElementById('searchInput').addEventListener('input', () => renderMistakes());
+    if (diffFilter) diffFilter.addEventListener('change', () => renderMistakes());
+    if (sortFilter) sortFilter.addEventListener('change', () => renderMistakes());
+    if (searchInput) searchInput.addEventListener('input', () => renderMistakes());
 }
 
 // Image Preview & Paste Support
@@ -430,19 +522,23 @@ function handleFile(file) {
     if (file && file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onload = (re) => {
-            imagePreview.src = re.target.result;
-            imagePreview.style.display = 'block';
+            if (imagePreview) {
+                imagePreview.src = re.target.result;
+                imagePreview.style.display = 'block';
+            }
         };
         reader.readAsDataURL(file);
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
-        imageInput.files = dataTransfer.files;
+        if (imageInput) imageInput.files = dataTransfer.files;
     }
 }
 
-imageInput.addEventListener('change', (e) => {
-    handleFile(e.target.files[0]);
-});
+if (imageInput) {
+    imageInput.addEventListener('change', (e) => {
+        handleFile(e.target.files[0]);
+    });
+}
 
 window.addEventListener('paste', (e) => {
     const items = e.clipboardData.items;
@@ -456,36 +552,44 @@ window.addEventListener('paste', (e) => {
 });
 
 // Add Mistake
-document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('saveBtn');
-    btn.disabled = true;
-    btn.textContent = 'Saving...';
-
-    const formData = new FormData(e.target);
-    try {
-        const res = await fetch('/api/mistakes', { method: 'POST', body: formData });
-        if (res.ok) {
-            playClickSound();
-            e.target.reset();
-            document.getElementById('imagePreview').style.display = 'none';
-            closeWindow('add');
-            openWindow('dashboard');
-            loadMistakes();
-        } else {
-            alert('Error saving');
+const uploadForm = document.getElementById('uploadForm');
+if (uploadForm) {
+    uploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('saveBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
         }
-    } catch (err) {
-        alert('Connection error');
-    } finally {
-        btn.disabled = false;
-        btn.textContent = 'Save to Database';
-    }
-});
+
+        const formData = new FormData(e.target);
+        try {
+            const res = await fetch('/api/mistakes', { method: 'POST', body: formData });
+            if (res.ok) {
+                playClickSound();
+                e.target.reset();
+                if (imagePreview) imagePreview.style.display = 'none';
+                closeWindow('add');
+                openWindow('dashboard');
+                loadMistakes();
+            } else {
+                alert('Error saving');
+            }
+        } catch (err) {
+            alert('Connection error');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'Save to Database';
+            }
+        }
+    });
+}
 
 // Load & Render Mistakes
 async function loadMistakes() {
     const container = document.getElementById('mistakesList');
+    if (!container) return;
     container.innerHTML = '<div class="empty-state">Loading...</div>';
     
     try {
@@ -499,10 +603,17 @@ async function loadMistakes() {
 
 function renderMistakes() {
     const container = document.getElementById('mistakesList');
-    const filterSubject = document.getElementById('subjectFilter').value;
-    const filterDifficulty = document.getElementById('difficultyFilter').value;
-    const sortType = document.getElementById('sortFilter').value;
-    const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+    if (!container) return;
+    
+    const subjectFilterElem = document.getElementById('subjectFilter');
+    const difficultyFilterElem = document.getElementById('difficultyFilter');
+    const sortFilterElem = document.getElementById('sortFilter');
+    const searchInputElem = document.getElementById('searchInput');
+
+    const filterSubject = subjectFilterElem ? subjectFilterElem.value : '';
+    const filterDifficulty = difficultyFilterElem ? difficultyFilterElem.value : '';
+    const sortType = sortFilterElem ? sortFilterElem.value : 'newest';
+    const searchQuery = searchInputElem ? searchInputElem.value.toLowerCase() : '';
     
     let filtered = [...currentMistakes];
     
@@ -542,7 +653,7 @@ function renderMistakes() {
         <div class="mistake-card" id="mistake-${m.id}" style="animation-delay: ${index * 0.05}s">
             <div class="window-header">
                 <div class="window-title">
-                    <img src="/static/icon-192.png" class="window-icon">
+                    <img src="https://win98icons.alexmeub.com/icons/png/file_lines-0.png" class="window-icon">
                     <span>${m.topic || 'Uncategorized'}.exe</span>
                 </div>
                 <div class="window-controls">
@@ -569,29 +680,36 @@ function renderMistakes() {
 
 function zoomImage(src) {
     playClickSound();
-    document.getElementById('modalImg').src = src;
-    document.getElementById('imageModal').style.display = 'flex';
+    const modalImg = document.getElementById('modalImg');
+    const imageModal = document.getElementById('imageModal');
+    if (modalImg && imageModal) {
+        modalImg.src = src;
+        imageModal.style.display = 'flex';
+    }
 }
 
 function showSolution(id) {
     playClickSound();
     const m = currentMistakes.find(x => x.id === id);
     if (m && m.ai_solution) {
-        document.getElementById('solutionOriginalImg').src = '/' + m.image_path;
-        const solText = document.getElementById('solutionText');
-        try {
-            let parsedHTML = marked.parse(m.ai_solution);
-            solText.innerHTML = parsedHTML;
-            Array.from(solText.children).forEach((child, idx) => {
-                child.style.animationDelay = `${idx * 0.1}s`;
-            });
-        } catch (e) {
-            console.error("Markdown parse error:", e);
-            solText.textContent = m.ai_solution;
-        }
-        document.getElementById('solutionModal').style.display = 'flex';
-        if (window.MathJax && window.MathJax.typesetPromise) {
-            window.MathJax.typesetPromise([solText]).catch(err => console.error(err));
+        const solutionOriginalImg = document.getElementById('solutionOriginalImg');
+        const solutionTextElem = document.getElementById('solutionText');
+        if (solutionOriginalImg) solutionOriginalImg.src = '/' + m.image_path;
+        if (solutionTextElem) {
+            try {
+                let parsedHTML = marked.parse(m.ai_solution);
+                solutionTextElem.innerHTML = parsedHTML;
+                Array.from(solutionTextElem.children).forEach((child, idx) => {
+                    child.style.animationDelay = `${idx * 0.1}s`;
+                });
+            } catch (e) {
+                console.error("Markdown parse error:", e);
+                solutionTextElem.textContent = m.ai_solution;
+            }
+            openWindow('solution');
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([solutionTextElem]).catch(err => console.error(err));
+            }
         }
     }
 }
@@ -616,41 +734,50 @@ function startEdit(id) {
     playClickSound();
     const m = currentMistakes.find(x => x.id === id);
     if (!m) return;
-    document.getElementById('editId').value = m.id;
-    document.getElementById('editSubject').value = m.subject;
-    updateTopics(m.subject, 'editTopic', m.topic);
-    document.getElementById('editDifficulty').value = m.difficulty;
-    document.getElementById('editMistake').value = m.mistake;
-    document.getElementById('editFix').value = m.actionable_fix;
+    const editId = document.getElementById('editId');
+    const editSubject = document.getElementById('editSubject');
+    const editDifficulty = document.getElementById('editDifficulty');
+    const editMistake = document.getElementById('editMistake');
+    const editFix = document.getElementById('editFix');
+
+    if (editId) editId.value = m.id;
+    if (editSubject) editSubject.value = m.subject;
+    updateTopics(m.subject, 'editTopicsList', m.topic);
+    if (editDifficulty) editDifficulty.value = m.difficulty;
+    if (editMistake) editMistake.value = m.mistake;
+    if (editFix) editFix.value = m.actionable_fix;
     openWindow('edit');
 }
 
-document.getElementById('editForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('editId').value;
-    const data = {
-        subject: document.getElementById('editSubject').value,
-        topic: document.getElementById('editTopic').value,
-        difficulty: document.getElementById('editDifficulty').value,
-        mistake: document.getElementById('editMistake').value,
-        actionable_fix: document.getElementById('editFix').value
-    };
-    try {
-        const res = await fetch(`/api/mistakes/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        if (res.ok) {
-            playClickSound();
-            closeWindow('edit');
-            loadMistakes();
-        } else {
-            alert('Update failed');
+const editForm = document.getElementById('editForm');
+if (editForm) {
+    editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('editId').value;
+        const data = {
+            subject: document.getElementById('editSubject').value,
+            topic: document.getElementById('editTopic').value,
+            difficulty: document.getElementById('editDifficulty').value,
+            mistake: document.getElementById('editMistake').value,
+            actionable_fix: document.getElementById('editFix').value
+        };
+        try {
+            const res = await fetch(`/api/mistakes/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (res.ok) {
+                playClickSound();
+                closeWindow('edit');
+                loadMistakes();
+            } else {
+                alert('Update failed');
+            }
+        } catch (err) {
+            alert('Connection error');
         }
-    } catch (err) {
-        alert('Connection error');
-    }
-});
+    });
+}
 
 init();

@@ -55,6 +55,13 @@ def get_mistakes():
     conn.close()
     return jsonify([dict(ix) for ix in mistakes])
 
+@app.route('/api/mistakes/stats', methods=['GET'])
+def get_mistakes_stats():
+    conn = get_db_connection()
+    row = conn.execute('SELECT COUNT(*) as count FROM mistakes WHERE ai_solution IS NULL').fetchone()
+    conn.close()
+    return jsonify({"unreviewed": row['count'] if row else 0})
+
 def update_config_if_needed(subject, topic, difficulty):
     if not os.path.exists(CONFIG_FILE):
         return
@@ -99,7 +106,7 @@ def add_mistake():
     topic = request.form.get('topic')
     difficulty = request.form.get('difficulty')
     mistake = request.form.get('mistake')
-    fix = request.form.get('fix')
+    fix = request.form.get('actionable_fix')
     
     update_config_if_needed(subject, topic, difficulty)
     
@@ -149,8 +156,9 @@ def delete_mistake(id):
     if mistake:
         # Delete image file if it exists
         image_path = mistake['image_path']
-        if os.path.exists(image_path):
-            os.remove(image_path)
+        full_path = os.path.join('static', image_path)
+        if os.path.exists(full_path):
+            os.remove(full_path)
         
         conn.execute('DELETE FROM mistakes WHERE id = ?', (id,))
         conn.commit()
